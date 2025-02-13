@@ -31,20 +31,103 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   // variables
-  //int _counter = 0;
+  String mathInput = "";
+  int inputLength = 0;
+  int openingBracketCounter = 0;
+  int closingBracketCounter = 0;
+  bool enteringMode = true;
 
   // methods that update the state of a variable
-  /*void _incrementCounter() {
+  void _buttonInput(String button) {
+    int inputLength = mathInput.length;
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      // numbers
+      if (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].contains(button)){
+        if (enteringMode && (mathInput.isNotEmpty || button != "0")) {
+          mathInput += button;
+        }
+      }
+      // operators
+      if (["+", "-", "*", "/"].contains(button)){
+        if (enteringMode && mathInput.isNotEmpty && 
+          ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",")"].contains(mathInput[inputLength - 1])) {
+            mathInput += button;
+          }
+      }
+      // clear
+      else if (button == "AC") {
+        mathInput = "";
+        openingBracketCounter = 0;
+        closingBracketCounter = 0;
+        enteringMode = true;
+      }
+      // remove last symbol
+      else if (button == "<-") {
+        if (enteringMode && mathInput.isNotEmpty) {
+          if (mathInput[inputLength - 1] == "(") {
+            openingBracketCounter -= 1;
+          }
+          else if (mathInput[inputLength - 1] == ")") {
+            closingBracketCounter -= 1;
+          }
+          mathInput = mathInput.substring(0, inputLength - 1);
+        }
+      }
+      // dot
+      else if (button == ".") {
+        if (enteringMode && _dotPlaceable(mathInput)) {
+          mathInput += button;
+        }
+      }
+      // brackets
+      else if (button == "(") {
+        if (enteringMode && mathInput.isEmpty || ["+", "-", "*", "/"].contains(mathInput[inputLength - 1])) {
+          mathInput += button;
+          openingBracketCounter += 1;
+        }
+      }
+      else if (button == ")") {
+        if (enteringMode && openingBracketCounter > closingBracketCounter && mathInput.isNotEmpty && 
+          ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",")"].contains(mathInput[inputLength - 1])) {
+            mathInput += button;
+            closingBracketCounter += 1;
+          }
+      }
+      // result
+      else if (button == "=") {
+        if (enteringMode && mathInput.isNotEmpty && openingBracketCounter == closingBracketCounter
+            && ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ")"].contains(mathInput[inputLength - 1])) {
+          mathInput += button;
+          enteringMode = false;
+          _calculateResult(mathInput);
+        }
+      }
     });
   }
-  */
+
+  bool _dotPlaceable(String mathInput) {
+    int inputLength = mathInput.length;
+    if (mathInput.isEmpty || ["+", "-", "*", "/", "(", ")"].contains(mathInput[inputLength - 1])) {
+      return false;
+    }
+    else {
+      int i = 1;
+      while (i < inputLength) {
+        if (mathInput[inputLength - i] == ".") {
+          return false;
+        }
+        else if (["+", "-", "*", "/"].contains(mathInput[inputLength - i])){
+          return true;
+        }
+        i += 1;
+      }
+      return true;
+    }
+  }
+
+  void _calculateResult(String mathInputString) {
+    // TO DO
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +142,17 @@ class _MyHomePageState extends State<MyHomePage> {
           // upper quarter stays empty
           Expanded(
             flex: 1,
-            child: Container(),
+            child: Container(
+              padding: const EdgeInsets.all(16.0), // Optional padding for better appearance
+              alignment: Alignment.centerRight, // Align text to the right
+              child: Text(
+                mathInput,
+                style: TextStyle(
+                  fontSize: 32.0, // Change the font size as needed
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
 
           // down three quarters with the buttons
@@ -73,11 +166,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 double buttonHeight = constraints.maxHeight / rows;
                 double buttonWidth = constraints.maxWidth / 4;
                 double aspectRatio = buttonWidth / buttonHeight;
-                print(
-                  "Button area:\n"
-                          "Width: ${constraints.maxWidth}\n"
-                          "Height: ${constraints.maxHeight}\n"
-                          "aspectRatio: $aspectRatio");
 
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -94,7 +182,52 @@ class _MyHomePageState extends State<MyHomePage> {
                       String buttonText = getButtonLabel(index); // function gets name for the corresponding button
                       
                       return ElevatedButton(
-                        onPressed: () {}, // to do give function to button
+                        onPressed: () {
+                          switch (index) {
+                            case 0: 
+                              _buttonInput("AC");
+                            case 1:
+                              _buttonInput("(");
+                            case 2:
+                              _buttonInput(")");
+                            case 3:
+                              _buttonInput("/");
+                            case 4:
+                              _buttonInput("7");
+                            case 5:
+                              _buttonInput("8");
+                            case 6:
+                              _buttonInput("9");
+                            case 7:
+                              _buttonInput("*");
+                            case 8:
+                              _buttonInput("4");
+                            case 9:
+                              _buttonInput("5");
+                            case 10:
+                              _buttonInput("6");
+                            case 11:
+                              _buttonInput("-");
+                            case 12:
+                              _buttonInput("1");
+                            case 13:
+                              _buttonInput("2");
+                            case 14:
+                              _buttonInput("3");
+                            case 15:
+                              _buttonInput("+");
+                            case 16:
+                              _buttonInput("0");
+                            case 17:
+                              _buttonInput(".");
+                            case 18:
+                              _buttonInput("<-");
+                            case 19:
+                              _buttonInput("=");
+                            default:
+                              _buttonInput("?");
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
                           foregroundColor: Colors.white,
@@ -152,7 +285,7 @@ class _MyHomePageState extends State<MyHomePage> {
       case 16:
         return '0';
       case 17:
-        return ',';
+        return '.';
       case 18:
         return '<-';
       case 19:

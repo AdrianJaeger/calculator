@@ -38,6 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool enteringMode = true;
 
   // methods that update the state of a variable
+  // helper variables used here are defined outside of the class
   void _buttonInput(String button) {
     int inputLength = mathInput.length;
     setState(() {
@@ -75,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       // dot
       else if (button == ".") {
-        if (enteringMode && _dotPlaceable(mathInput)) {
+        if (enteringMode && dotPlaceable(mathInput)) {
           mathInput += button;
         }
       }
@@ -105,28 +106,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  bool _dotPlaceable(String mathInput) {
-    int inputLength = mathInput.length;
-    if (mathInput.isEmpty || ["+", "-", "*", "/", "(", ")"].contains(mathInput[inputLength - 1])) {
-      return false;
-    }
-    else {
-      int i = 1;
-      while (i < inputLength) {
-        if (mathInput[inputLength - i] == ".") {
-          return false;
-        }
-        else if (["+", "-", "*", "/"].contains(mathInput[inputLength - i])){
-          return true;
-        }
-        i += 1;
-      }
-      return true;
-    }
-  }
-
   void _calculateResult(String mathInputString) {
+    // convert mathmatical term to list of all tokens as strings
+    List<String> tokenList = _tokenize(mathInputString);
     // TO DO
+    // use shunting yard algorithm to solve
   }
 
   @override
@@ -247,51 +231,87 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
 
-  String getButtonLabel(int index) {
-    switch (index) {
-      case 0: 
-        return'AC';
-      case 1:
-        return '(';
-      case 2:
-        return ')';
-      case 3:
-        return '/';
-      case 4:
-        return '7';
-      case 5:
-        return '8';
-      case 6:
-        return '9';
-      case 7:
-        return '*';
-      case 8:
-        return '4';
-      case 9:
-        return '5';
-      case 10:
-        return '6';
-      case 11:
-        return '-';
-      case 12:
-        return '1';
-      case 13:
-        return '2';
-      case 14:
-        return '3';
-      case 15:
-        return '+';
-      case 16:
-        return '0';
-      case 17:
-        return '.';
-      case 18:
-        return '<-';
-      case 19:
-        return '=';
-      default:
-        return '?';
+// helper function for _buttonInput method
+bool dotPlaceable(String mathInput) {
+  int inputLength = mathInput.length;
+  if (mathInput.isEmpty || ["+", "-", "*", "/", "(", ")"].contains(mathInput[inputLength - 1])) {
+    return false;
+  }
+  else {
+    int i = 1;
+    while (i < inputLength) {
+      if (mathInput[inputLength - i] == ".") {
+        return false;
+      }
+      else if (["+", "-", "*", "/"].contains(mathInput[inputLength - i])){
+        return true;
+      }
+      i += 1;
     }
+    return true;
+  }
+}
+
+// takes string of mathmatical term and returns list of all tokens as strings
+List<String> _tokenize(String input) {
+  // regular expression to find integer numbers, float numbers, operators and brackets
+  RegExp regex = RegExp(r'(\d+(\.\d+)?|[+\-*/()])');
+  // find all matches in input string
+  Iterable<Match> matches = regex.allMatches(input);
+  // convert every match into a single string
+  Iterable<String> tokensIterable = matches.map((match) {
+    return match.group(0)!;
+  });
+  // convert iterable to list
+  List<String> tokenList = tokensIterable.toList();
+  return tokenList;
+}
+
+String getButtonLabel(int index) {
+  switch (index) {
+    case 0: 
+      return'AC';
+    case 1:
+      return '(';
+    case 2:
+      return ')';
+    case 3:
+      return '/';
+    case 4:
+      return '7';
+    case 5:
+      return '8';
+    case 6:
+      return '9';
+    case 7:
+      return '*';
+    case 8:
+      return '4';
+    case 9:
+      return '5';
+    case 10:
+      return '6';
+    case 11:
+      return '-';
+    case 12:
+      return '1';
+    case 13:
+      return '2';
+    case 14:
+      return '3';
+    case 15:
+      return '+';
+    case 16:
+      return '0';
+    case 17:
+      return '.';
+    case 18:
+      return '<-';
+    case 19:
+      return '=';
+    default:
+      return '?';
   }
 }

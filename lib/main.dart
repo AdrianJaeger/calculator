@@ -32,87 +32,89 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   // variables
-  String mathInput = "";
-  int inputLength = 0;
-  int openingBracketCounter = 0;
-  int closingBracketCounter = 0;
-  bool enteringMode = true;
+  ScrollController _scrollController = ScrollController();  
+  String _mathInput = "";
+  int _inputLength = 0;
+  int _openingBracketCounter = 0;
+  int _closingBracketCounter = 0;
+  bool _enteringMode = true;
+  double _result = 0;
 
   // methods that update the state of a variable
   // helper variables used here are defined outside of the class
   void _buttonInput(String button) {
-    int inputLength = mathInput.length;
+    int _inputLength = _mathInput.length;
     setState(() {
       // numbers
       if (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].contains(button)){
-        if (enteringMode && (mathInput.isNotEmpty || button != "0")) {
-          mathInput += button;
+        if (_enteringMode && (_mathInput.isNotEmpty || button != "0")) {
+          _mathInput += button;
         }
       }
       // operators
       if (["+", "-", "*", "/"].contains(button)){
-        if (enteringMode && mathInput.isNotEmpty && 
-          ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",")"].contains(mathInput[inputLength - 1])) {
-            mathInput += button;
+        if (_enteringMode && _mathInput.isNotEmpty && 
+          ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",")"].contains(_mathInput[_inputLength - 1])) {
+            _mathInput += button;
           }
       }
       // clear
       else if (button == "AC") {
-        mathInput = "";
-        openingBracketCounter = 0;
-        closingBracketCounter = 0;
-        enteringMode = true;
+        _mathInput = "";
+        _openingBracketCounter = 0;
+        _closingBracketCounter = 0;
+        _enteringMode = true;
       }
       // remove last symbol
       else if (button == "<-") {
-        if (enteringMode && mathInput.isNotEmpty) {
-          if (mathInput[inputLength - 1] == "(") {
-            openingBracketCounter -= 1;
+        if (_enteringMode && _mathInput.isNotEmpty) {
+          if (_mathInput[_inputLength - 1] == "(") {
+            _openingBracketCounter -= 1;
           }
-          else if (mathInput[inputLength - 1] == ")") {
-            closingBracketCounter -= 1;
+          else if (_mathInput[_inputLength - 1] == ")") {
+            _closingBracketCounter -= 1;
           }
-          mathInput = mathInput.substring(0, inputLength - 1);
+          _mathInput = _mathInput.substring(0, _inputLength - 1);
         }
       }
       // dot
       else if (button == ".") {
-        if (enteringMode && dotPlaceable(mathInput)) {
-          mathInput += button;
+        if (_enteringMode && dotPlaceable(_mathInput)) {
+          _mathInput += button;
         }
       }
       // brackets
       else if (button == "(") {
-        if (enteringMode && mathInput.isEmpty || ["+", "-", "*", "/"].contains(mathInput[inputLength - 1])) {
-          mathInput += button;
-          openingBracketCounter += 1;
+        if (_enteringMode && _mathInput.isEmpty || ["+", "-", "*", "/"].contains(_mathInput[_inputLength - 1])) {
+          _mathInput += button;
+          _openingBracketCounter += 1;
         }
       }
       else if (button == ")") {
-        if (enteringMode && openingBracketCounter > closingBracketCounter && mathInput.isNotEmpty && 
-          ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",")"].contains(mathInput[inputLength - 1])) {
-            mathInput += button;
-            closingBracketCounter += 1;
+        if (_enteringMode && _openingBracketCounter > _closingBracketCounter && _mathInput.isNotEmpty && 
+          ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",")"].contains(_mathInput[_inputLength - 1])) {
+            _mathInput += button;
+            _closingBracketCounter += 1;
           }
       }
       // result
       else if (button == "=") {
-        if (enteringMode && mathInput.isNotEmpty && openingBracketCounter == closingBracketCounter
-            && ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ")"].contains(mathInput[inputLength - 1])) {
-          mathInput += button;
-          enteringMode = false;
-          _calculateResult(mathInput);
+        if (_enteringMode && _mathInput.isNotEmpty && _openingBracketCounter == _closingBracketCounter
+            && ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ")"].contains(_mathInput[_inputLength - 1])) {
+          _enteringMode = false;
         }
       }
     });
   }
 
-  void _calculateResult(String mathInputString) {
+  String _calculateResult() {
     // convert mathmatical term to list of all tokens as strings
-    List<String> tokenList = _tokenize(mathInputString);
+    List<String> tokenList = _tokenize(_mathInput);
+    // 
     List<String> postfixTokens = shuntingYardAlgorithm(tokenList);
-    double result = evaluatePostfix(postfixTokens);
-    mathInput += result.toString();
+    //
+    _result = evaluatePostfix(postfixTokens);
+    return _result.toString();
   }
 
   @override
@@ -125,18 +127,38 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: [
-
-          // upper quarter stays empty
+          // display area for input and result
           Expanded(
             flex: 1,
             child: Container(
-              padding: const EdgeInsets.all(16.0), // Optional padding for better appearance
-              alignment: Alignment.centerRight, // Align text to the right
-              child: Text(
-                mathInput,
-                style: TextStyle(
-                  fontSize: 32.0, // Change the font size as needed
-                  fontWeight: FontWeight.bold,
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.centerLeft,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical, // for long input
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start, // align text to the top
+                  crossAxisAlignment: CrossAxisAlignment.start, // align text to the left
+                  children: [
+                    Text(
+                      _mathInput,
+                      style: TextStyle(
+                        fontSize: 32.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (!_enteringMode)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child:
+                          Text(
+                            "= ${_calculateResult()}", // Display the result
+                            style: TextStyle(
+                              fontSize: 32.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                      ),
+                  ],
                 ),
               ),
             ),

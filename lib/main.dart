@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 80, 156, 255)),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Calculator Home Page'),
+      home: const MyHomePage(title: 'Calculator'),
     );
   }
 }
@@ -109,8 +110,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void _calculateResult(String mathInputString) {
     // convert mathmatical term to list of all tokens as strings
     List<String> tokenList = _tokenize(mathInputString);
+    List<String> postfixTokens = shuntingYardAlgorithm(tokenList);
     // TO DO
-    // use shunting yard algorithm to solve
+    // solve postfix notation
   }
 
   @override
@@ -119,6 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -165,51 +168,74 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemBuilder: (context, index) {
                       String buttonText = getButtonLabel(index); // function gets name for the corresponding button
                       
-                      return ElevatedButton(
+                      Widget button = ElevatedButton(
                         onPressed: () {
+                          HapticFeedback.mediumImpact();
+
                           switch (index) {
                             case 0: 
                               _buttonInput("AC");
+                              break;
                             case 1:
                               _buttonInput("(");
+                              break;
                             case 2:
                               _buttonInput(")");
+                              break;
                             case 3:
                               _buttonInput("/");
+                              break;
                             case 4:
                               _buttonInput("7");
+                              break;
                             case 5:
                               _buttonInput("8");
+                              break;
                             case 6:
                               _buttonInput("9");
+                              break;
                             case 7:
                               _buttonInput("*");
+                              break;
                             case 8:
                               _buttonInput("4");
+                              break;
                             case 9:
                               _buttonInput("5");
+                              break;
                             case 10:
                               _buttonInput("6");
+                              break;
                             case 11:
                               _buttonInput("-");
+                              break;
                             case 12:
                               _buttonInput("1");
+                              break;
                             case 13:
                               _buttonInput("2");
+                              break;
                             case 14:
                               _buttonInput("3");
+                              break;
                             case 15:
                               _buttonInput("+");
+                              break;
                             case 16:
                               _buttonInput("0");
+                              break;
                             case 17:
                               _buttonInput(".");
+                              break;
                             case 18:
                               _buttonInput("<-");
+                              break;
                             case 19:
                               _buttonInput("=");
+                              break;
                             default:
                               _buttonInput("?");
+                              break;
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -221,6 +247,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         child: Text(buttonText),
                       );
+                      if (index == 0) {
+                        return Tooltip(
+                          message: "Clear",
+                          child: button,
+                        );
+                      }
+                      else {
+                        return button;
+                      }
                     },
                   ),
                 );
@@ -267,6 +302,54 @@ List<String> _tokenize(String input) {
   // convert iterable to list
   List<String> tokenList = tokensIterable.toList();
   return tokenList;
+}
+
+List<String> shuntingYardAlgorithm(List<String> tokens) {
+  List<String> outputQueue = [];
+  List<String> operatorStack = [];
+
+  // operator prioritys to follow oder of operations
+  Map<String, int> precedence = {
+    "+": 1,
+    "-": 1,
+    "*": 2,
+    "/": 2
+  };
+
+  for (String token in tokens) {
+    // if token is a number, put it on outputQueue
+    if (RegExp(r'^\d+(\.\d+)?$').hasMatch(token)) {
+      outputQueue.add(token);
+    }
+    // if token is operator
+    else if (precedence.containsKey(token)) {
+      // last element on operator stack is also operator
+      // and that one has higher or same priority -> it has to be evaluated first
+      while (operatorStack.isNotEmpty && precedence.containsKey(operatorStack.last) &&
+        precedence[operatorStack.last]! >= precedence[token]!) {
+          outputQueue.add(operatorStack.removeLast());
+      }
+      // no higher or same prio -> put operator on operator stack
+      operatorStack.add(token);
+    }
+    // bracket 
+    // just put opening bracket on stack
+    else if (token == "(") {
+      operatorStack.add(token);
+    }
+    // put all operators that were in the brackets on output queue
+    else if (token == ")") {
+      while (operatorStack.isNotEmpty && operatorStack.last != "(") {
+        outputQueue.add(operatorStack.removeLast());
+      }
+      operatorStack.removeLast(); // remove opening bracket
+    }
+  }
+  // put remaining operators on output queue
+  while (operatorStack.isNotEmpty) {
+    outputQueue.add(operatorStack.removeLast());
+  }
+  return outputQueue;
 }
 
 String getButtonLabel(int index) {

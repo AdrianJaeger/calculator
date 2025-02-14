@@ -111,8 +111,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // convert mathmatical term to list of all tokens as strings
     List<String> tokenList = _tokenize(mathInputString);
     List<String> postfixTokens = shuntingYardAlgorithm(tokenList);
-    // TO DO
-    // solve postfix notation
+    double result = evaluatePostfix(postfixTokens);
+    mathInput += result.toString();
   }
 
   @override
@@ -289,9 +289,9 @@ bool dotPlaceable(String mathInput) {
   }
 }
 
-// takes string of mathmatical term and returns list of all tokens as strings
+// converts mathmatical expression to list of all tokens as strings
 List<String> _tokenize(String input) {
-  // regular expression to find integer numbers, float numbers, operators and brackets
+  // regular expression to find integer numbers, float numbers, operators and brackets (gets rid of =)
   RegExp regex = RegExp(r'(\d+(\.\d+)?|[+\-*/()])');
   // find all matches in input string
   Iterable<Match> matches = regex.allMatches(input);
@@ -304,6 +304,7 @@ List<String> _tokenize(String input) {
   return tokenList;
 }
 
+// converts tokenized expression to postfix notation
 List<String> shuntingYardAlgorithm(List<String> tokens) {
   List<String> outputQueue = [];
   List<String> operatorStack = [];
@@ -350,6 +351,36 @@ List<String> shuntingYardAlgorithm(List<String> tokens) {
     outputQueue.add(operatorStack.removeLast());
   }
   return outputQueue;
+}
+
+// calculate postfix notation to get result of the user input expression
+double evaluatePostfix(List<String> postfixTokens) {
+  List<double> stack = [];
+
+  for (String token in postfixTokens) {
+    // if token is a number, converted it to a double and put it on stack
+    if (RegExp(r'^\d+(\.\d+)?$').hasMatch(token)) {
+      stack.add(double.parse(token));
+    } 
+    // token is a operator
+    // take last 2 numbers from stack and use operator on them
+    else {
+      double b = stack.removeLast();
+      double a = stack.removeLast();
+
+      if (token == "+") {
+        stack.add(a + b);
+      } else if (token == "-") {
+        stack.add(a - b);
+      } else if (token == "*") {
+        stack.add(a * b);
+      } else if (token == "/") {
+        stack.add(a / b);
+      }
+    }
+  }
+  // result
+  return stack.last;
 }
 
 String getButtonLabel(int index) {

@@ -32,7 +32,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   // variables
-  ScrollController _scrollController = ScrollController();  
   String _mathInput = "";
   int _inputLength = 0;
   int _openingBracketCounter = 0;
@@ -43,11 +42,11 @@ class _MyHomePageState extends State<MyHomePage> {
   // methods that update the state of a variable
   // helper variables used here are defined outside of the class
   void _buttonInput(String button) {
-    int _inputLength = _mathInput.length;
+    _inputLength = _mathInput.length;
     setState(() {
       // numbers
       if (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].contains(button)){
-        if (_enteringMode && (_mathInput.isNotEmpty || button != "0")) {
+        if (_enteringMode) {
           _mathInput += button;
         }
       }

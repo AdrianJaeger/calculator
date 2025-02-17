@@ -109,11 +109,17 @@ class _MyHomePageState extends State<MyHomePage> {
   String _calculateResult() {
     // convert mathmatical term to list of all tokens as strings
     List<String> tokenList = _tokenize(_mathInput);
-    // 
+    // convert token list to postfix notation
     List<String> postfixTokens = shuntingYardAlgorithm(tokenList);
-    //
+    // calculate the result
     _result = evaluatePostfix(postfixTokens);
-    return _result.toString();
+    // if number is int, present it without ".0"
+    if (_result % 1 == 0) {
+      return _result.toInt().toString();
+    }
+    else {
+      return _result.toString();
+    }
   }
 
   @override

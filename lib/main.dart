@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:math';
 
 void main() {
   runApp(const MyApp());
@@ -113,6 +114,9 @@ class _MyHomePageState extends State<MyHomePage> {
     List<String> postfixTokens = shuntingYardAlgorithm(tokenList);
     // calculate the result
     _result = evaluatePostfix(postfixTokens);
+    // prevent floating point error by round to 10 digits after dot
+    double mod = pow(10.0, 10).toDouble();
+    _result = ((_result * mod).round().toDouble() / mod);
     // if number is int, present it without ".0"
     if (_result % 1 == 0) {
       return _result.toInt().toString();

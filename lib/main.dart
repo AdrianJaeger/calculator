@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 80, 156, 255)),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData.dark(),
       home: const MyHomePage(title: 'Calculator'),
     );
   }
@@ -32,6 +33,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _isDarkMode = false; // theme state
+  // getter for isDarkMode
+  bool get isDarkMode => _isDarkMode;
+
   // variables
   String _mathInput = "";
   int _inputLength = 0;
@@ -41,7 +46,12 @@ class _MyHomePageState extends State<MyHomePage> {
   double _result = 0;
 
   // methods that update the state of a variable
-  // helper variables used here are defined outside of the class
+  void _toggleTheme() {
+    setState(() {
+      _isDarkMode = !_isDarkMode;
+    });
+  }
+
   void _buttonInput(String button) {
     _inputLength = _mathInput.length;
     setState(() {
@@ -128,172 +138,190 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          // display area for input and result
-          Expanded(
-            flex: 1,
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              alignment: Alignment.centerLeft,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical, // for long input
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start, // align text to the top
-                  crossAxisAlignment: CrossAxisAlignment.start, // align text to the left
-                  children: [
-                    Text(
-                      _mathInput,
-                      style: TextStyle(
-                        fontSize: 32.0,
-                        fontWeight: FontWeight.bold,
+    return MaterialApp(
+      theme: _isDarkMode
+          ? ThemeData.dark() // Dark Theme
+          : ThemeData.light(), // Light Theme
+      home: Scaffold (
+        appBar: AppBar(
+          backgroundColor: Colors.blue[900],
+          title: Text(
+            widget.title,
+            style: TextStyle(color: Colors.white)),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: Icon(
+                _isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: Colors.white
+              ),
+              onPressed: () {
+                _toggleTheme();
+              }
+              )
+          ]
+        ),
+        body: Column(
+          children: [
+            // display area for input and result
+            Expanded(
+              flex: 1,
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical, // for long input
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start, // align text to the top
+                    crossAxisAlignment: CrossAxisAlignment.start, // align text to the left
+                    children: [
+                      Text(
+                        _mathInput,
+                        style: TextStyle(
+                          fontSize: 32.0,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    if (!_enteringMode)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child:
-                          Text(
-                            "= ${_calculateResult()}", // Display the result
-                            style: TextStyle(
-                              fontSize: 32.0,
-                              fontWeight: FontWeight.bold,
+                      if (!_enteringMode)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child:
+                            Text(
+                              "= ${_calculateResult()}", // Display the result
+                              style: TextStyle(
+                                fontSize: 32.0,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                      ),
-                  ],
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
 
-          // down three quarters with the buttons
-          Expanded(
-            flex: 3,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                
-                // this makes buttons the right size to fill the whole button area
-                int rows = 5;
-                double buttonHeight = constraints.maxHeight / rows;
-                double buttonWidth = constraints.maxWidth / 4;
-                double aspectRatio = buttonWidth / buttonHeight;
+            // down three quarters with the buttons
+            Expanded(
+              flex: 3,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  
+                  // this makes buttons the right size to fill the whole button area
+                  int rows = 5;
+                  double buttonHeight = constraints.maxHeight / rows;
+                  double buttonWidth = constraints.maxWidth / 4;
+                  double aspectRatio = buttonWidth / buttonHeight;
 
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(), //deactivates scrolling of buttons
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      mainAxisSpacing: 8,
-                      crossAxisSpacing: 8,
-                      childAspectRatio: aspectRatio,
-                    ),
-                    itemCount: 20,
-                    itemBuilder: (context, index) {
-                      String buttonText = getButtonLabel(index); // function gets name for the corresponding button
-                      
-                      Widget button = ElevatedButton(
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(), //deactivates scrolling of buttons
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        childAspectRatio: aspectRatio,
+                      ),
+                      itemCount: 20,
+                      itemBuilder: (context, index) {
+                        String buttonText = getButtonLabel(index); // function gets name for the corresponding button
+                        
+                        Widget button = ElevatedButton(
+                          onPressed: () {
+                            HapticFeedback.mediumImpact();
 
-                          switch (index) {
-                            case 0: 
-                              _buttonInput("AC");
-                              break;
-                            case 1:
-                              _buttonInput("(");
-                              break;
-                            case 2:
-                              _buttonInput(")");
-                              break;
-                            case 3:
-                              _buttonInput("/");
-                              break;
-                            case 4:
-                              _buttonInput("7");
-                              break;
-                            case 5:
-                              _buttonInput("8");
-                              break;
-                            case 6:
-                              _buttonInput("9");
-                              break;
-                            case 7:
-                              _buttonInput("*");
-                              break;
-                            case 8:
-                              _buttonInput("4");
-                              break;
-                            case 9:
-                              _buttonInput("5");
-                              break;
-                            case 10:
-                              _buttonInput("6");
-                              break;
-                            case 11:
-                              _buttonInput("-");
-                              break;
-                            case 12:
-                              _buttonInput("1");
-                              break;
-                            case 13:
-                              _buttonInput("2");
-                              break;
-                            case 14:
-                              _buttonInput("3");
-                              break;
-                            case 15:
-                              _buttonInput("+");
-                              break;
-                            case 16:
-                              _buttonInput("0");
-                              break;
-                            case 17:
-                              _buttonInput(".");
-                              break;
-                            case 18:
-                              _buttonInput("<-");
-                              break;
-                            case 19:
-                              _buttonInput("=");
-                              break;
-                            default:
-                              _buttonInput("?");
-                              break;
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            switch (index) {
+                              case 0: 
+                                _buttonInput("AC");
+                                break;
+                              case 1:
+                                _buttonInput("(");
+                                break;
+                              case 2:
+                                _buttonInput(")");
+                                break;
+                              case 3:
+                                _buttonInput("/");
+                                break;
+                              case 4:
+                                _buttonInput("7");
+                                break;
+                              case 5:
+                                _buttonInput("8");
+                                break;
+                              case 6:
+                                _buttonInput("9");
+                                break;
+                              case 7:
+                                _buttonInput("*");
+                                break;
+                              case 8:
+                                _buttonInput("4");
+                                break;
+                              case 9:
+                                _buttonInput("5");
+                                break;
+                              case 10:
+                                _buttonInput("6");
+                                break;
+                              case 11:
+                                _buttonInput("-");
+                                break;
+                              case 12:
+                                _buttonInput("1");
+                                break;
+                              case 13:
+                                _buttonInput("2");
+                                break;
+                              case 14:
+                                _buttonInput("3");
+                                break;
+                              case 15:
+                                _buttonInput("+");
+                                break;
+                              case 16:
+                                _buttonInput("0");
+                                break;
+                              case 17:
+                                _buttonInput(".");
+                                break;
+                              case 18:
+                                _buttonInput("<-");
+                                break;
+                              case 19:
+                                _buttonInput("=");
+                                break;
+                              default:
+                                _buttonInput("?");
+                                break;
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                        ),
-                        child: Text(buttonText),
-                      );
-                      if (index == 0) {
-                        return Tooltip(
-                          message: "Clear",
-                          child: button,
+                          child: Text(buttonText),
                         );
-                      }
-                      else {
-                        return button;
-                      }
-                    },
-                  ),
-                );
-              }
+                        if (index == 0) {
+                          return Tooltip(
+                            message: "Clear",
+                            child: button,
+                          );
+                        }
+                        else {
+                          return button;
+                        }
+                      },
+                    ),
+                  );
+                }
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

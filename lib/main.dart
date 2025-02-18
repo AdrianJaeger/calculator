@@ -123,16 +123,22 @@ class _MyHomePageState extends State<MyHomePage> {
     // convert token list to postfix notation
     List<String> postfixTokens = shuntingYardAlgorithm(tokenList);
     // calculate the result
-    _result = evaluatePostfix(postfixTokens);
-    // prevent floating point error by round to 10 digits after dot
-    double mod = pow(10.0, 10).toDouble();
-    _result = ((_result * mod).round().toDouble() / mod);
-    // if number is int, present it without ".0"
-    if (_result % 1 == 0) {
-      return _result.toInt().toString();
+    try {
+      _result = evaluatePostfix(postfixTokens);
+      // prevent floating point error by round to 10 digits after dot
+      double mod = pow(10.0, 10).toDouble();
+      _result = ((_result * mod).round().toDouble() / mod);
+      // if number is int, present it without ".0"
+      if (_result % 1 == 0) {
+        return "= ${_result.toInt().toString()}";
+      }
+      else {
+        return _result.toString();
+      }
     }
-    else {
-      return _result.toString();
+    catch (e) {
+      // return error message for division by zero
+      return "Error: Division by zero";
     }
   }
 
@@ -187,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           alignment: Alignment.centerRight,
                           child:
                             Text(
-                              "= ${_calculateResult()}", // Display the result
+                              _calculateResult(), // Display the result
                               style: TextStyle(
                                 fontSize: 32.0,
                                 fontWeight: FontWeight.bold,
@@ -434,6 +440,10 @@ double evaluatePostfix(List<String> postfixTokens) {
       } else if (token == "*") {
         stack.add(a * b);
       } else if (token == "/") {
+        // check for division by zero
+        if (b == 0) {
+          throw Exception("Division by zero");
+        }
         stack.add(a / b);
       }
     }

@@ -137,8 +137,12 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
     catch (e) {
-      // return error message for division by zero
-      return "Error: Division by zero";
+      if (e is Exception && e.toString() == "Exception: Division by zero") {
+        return "Error: Division by zero";
+      }
+      else {
+        return "Error: Calculation error";
+      }
     }
   }
 

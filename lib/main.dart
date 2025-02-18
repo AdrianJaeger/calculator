@@ -57,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       // numbers
       if (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].contains(button)){
-        if (_enteringMode) {
+        if (_enteringMode  && (_mathInput.isEmpty || _mathInput[_inputLength - 1] != ")")) {
           _mathInput += button;
         }
       }
@@ -95,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       // brackets
       else if (button == "(") {
-        if (_enteringMode && _mathInput.isEmpty || ["+", "-", "*", "/"].contains(_mathInput[_inputLength - 1])) {
+        if (_enteringMode && _mathInput.isEmpty || ["+", "-", "*", "/", "("].contains(_mathInput[_inputLength - 1])) {
           _mathInput += button;
           _openingBracketCounter += 1;
         }

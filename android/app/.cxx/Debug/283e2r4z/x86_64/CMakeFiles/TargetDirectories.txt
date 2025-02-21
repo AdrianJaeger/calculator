@@ -1,0 +1,2 @@
+C:/Users/adria/Desktop/Projects/calculator/android/app/.cxx/Debug/283e2r4z/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/adria/Desktop/Projects/calculator/android/app/.cxx/Debug/283e2r4z/x86_64/CMakeFiles/rebuild_cache.dir

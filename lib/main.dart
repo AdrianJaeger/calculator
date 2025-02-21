@@ -58,8 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // numbers
       if (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].contains(button)){
         if (_enteringMode  && 
-        (_mathInput.isEmpty || _mathInput[_inputLength - 1] != ")") &&
-        (button != "0" || _mathInput[_inputLength - 1] != "/")) { //avoiding floating point error
+        (_mathInput.isEmpty || _mathInput[_inputLength - 1] != ")")) {
           _mathInput += button;
         }
       }
@@ -454,7 +453,7 @@ double evaluatePostfix(List<String> postfixTokens) {
           throw Exception("Division by zero");
         }
         // prevent of a wrong result caused by floating point error
-        if ((a.abs() / b.abs() > 1e10)) {
+        if ((a.abs() / b.abs() > 1e8)) {
           throw Exception("Floating point error");
         }
 

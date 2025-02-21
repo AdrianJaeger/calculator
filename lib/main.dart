@@ -142,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
         return "Error: Division by zero";
       }
       else if (e is Exception && e.toString() == "Exception: Floating point error") {
-        return "Error: Floating point";
+        return "Error: Precision loss";
       }
       else {
         return "Error: Calculation error";
@@ -446,7 +446,12 @@ double evaluatePostfix(List<String> postfixTokens) {
       } else if (token == "-") {
         stack.add(a - b);
       } else if (token == "*") {
-        stack.add(a * b);
+        // prevent of a wrong result caused by floating point error
+        double result = a * b;
+        if (result.abs() > 1e11) {
+          throw Exception("Floating point error");
+        }
+        stack.add(result);
       } else if (token == "/") {
         // check for division by zero
         if (b == 0) {
@@ -456,7 +461,6 @@ double evaluatePostfix(List<String> postfixTokens) {
         if ((a.abs() / b.abs() > 1e8)) {
           throw Exception("Floating point error");
         }
-
         stack.add(a / b);
       }
     }

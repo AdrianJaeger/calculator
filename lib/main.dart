@@ -127,8 +127,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // calculate the result
     try {
       _result = evaluatePostfix(postfixTokens);
-      // prevent floating point error by round to 10 digits after dot
-      double mod = pow(10.0, 10).toDouble();
+      // prevent floating point error by round to 7 digits after dot
+      double mod = pow(10.0, 7).toDouble();
       _result = ((_result * mod).round().toDouble() / mod);
       // if number is int, present it without ".0"
       if (_result % 1 == 0) {
@@ -141,6 +141,9 @@ class _MyHomePageState extends State<MyHomePage> {
     catch (e) {
       if (e is Exception && e.toString() == "Exception: Division by zero") {
         return "Error: Division by zero";
+      }
+      else if (e is Exception && e.toString() == "Exception: Floating point error") {
+        return "Error: Floating point";
       }
       else {
         return "Error: Calculation error";
@@ -450,6 +453,11 @@ double evaluatePostfix(List<String> postfixTokens) {
         if (b == 0) {
           throw Exception("Division by zero");
         }
+        // prevent of a wrong result caused by floating point error
+        if ((a.abs() / b.abs() > 1e10)) {
+          throw Exception("Floating point error");
+        }
+
         stack.add(a / b);
       }
     }
